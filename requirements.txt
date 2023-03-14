@@ -1,0 +1,5 @@
+numpy
+ta-lib
+ccxt
+importlib
+scipy
