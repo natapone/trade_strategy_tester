@@ -19,7 +19,7 @@ def run_test(symbols,
     # Steps
 
     #1 select set of test data, fetch from source
-    data = datasource.fetch(symbols)
+    data = datasource.fetch(symbols,since_dt=since_dt,timeframe=timeframe)
 
     #2 generate_trading_signals
     signal_returns = {}
@@ -37,8 +37,8 @@ def run_test(symbols,
     strategy_test_results = {}
     for symbol in symbols:
 
-        #     signal_returns[symbol].plot.hist(bins=100, alpha=0.5)
-        #     plot_daily_return(signal_returns[symbol])
+        # signal_returns[symbol].plot.hist(bins=100, alpha=0.5)
+        plot_daily_return(signal_returns[symbol])
 
         t_stat, p_value = tester.test_result( signal_returns[symbol] )
 
@@ -124,11 +124,12 @@ def print_test_result(strategy_test_results):
         t_stat = strategy_test_results[symbol]['t_stat']
         p_value = strategy_test_results[symbol]['p_value']
 
-        print("""
-        {} Significant T-Test result comparing to mean return = 0:
-        t-stat:        {:.3f}
-        p-value:        {:.6f}
-        """.format(symbol, t_stat, p_value))
+        print(
+"""
+{} Significant T-Test result comparing to mean return = 0:
+t-stat:        {:.3f}
+p-value:        {:.6f}
+""".format(symbol, t_stat, p_value))
 
     # Save image
     # ax = s.plot.hist()

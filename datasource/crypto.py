@@ -18,9 +18,9 @@ def fetch(symbols, since_dt=None, timeframe='1h', candle_limit=1000):
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
         df.set_index('timestamp', inplace=True)
 
-        print(f"=={symbol}==")
-        print(df.head(3))
-        print(df.tail(3))
+        # print(f"=={symbol}==")
+        # print(df.head(3))
+        # print(df.tail(3))
         data[symbol] = df
 
     return data
