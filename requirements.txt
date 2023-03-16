@@ -3,3 +3,4 @@ ta-lib
 ccxt
 importlib
 scipy
+openai
