@@ -32,13 +32,13 @@ def generate_trading_signal(dataframe, *args):
     dataframe['BB_Upper'], dataframe['BB_Middle'], dataframe['BB_Lower'] = ta.BBANDS(dataframe['close'], bband_time_period, bband_std)
 
     #combile conditions from all indicators to create Bullish, Bearish, Overbought, Oversold signals
-    dataframe['Enter_Long'] = np.where((dataframe['SMA'] > dataframe['close']) & (dataframe['MACD'] < dataframe['MACD_Signal']) & (dataframe['RSI'] < RSI_low) & (dataframe['close'] < dataframe['BB_Lower']), 1, 0)
-    dataframe['Exit_Long'] = np.where((dataframe['SMA'] < dataframe['close']) & (dataframe['MACD'] > dataframe['MACD_Signal']) & (dataframe['RSI'] > RSI_high) & (dataframe['close'] > dataframe['BB_Upper']), 1, 0)
-    dataframe['Enter_Short'] = np.where((dataframe['SMA'] < dataframe['close']) & (dataframe['MACD'] > dataframe['MACD_Signal']) & (dataframe['RSI'] > RSI_high) & (dataframe['close'] > dataframe['BB_Upper']), 1, 0)
-    dataframe['Exit_Short'] = np.where((dataframe['SMA'] > dataframe['close']) & (dataframe['MACD'] < dataframe['MACD_Signal']) & (dataframe['RSI'] < RSI_low) & (dataframe['close'] < dataframe['BB_Lower']), 1, 0)
+    dataframe['enter_long'] = np.where((dataframe['SMA'] > dataframe['close']) & (dataframe['MACD'] < dataframe['MACD_Signal']) & (dataframe['RSI'] < RSI_low) & (dataframe['close'] < dataframe['BB_Lower']), 1, 0)
+    dataframe['exit_long'] = np.where((dataframe['SMA'] < dataframe['close']) & (dataframe['MACD'] > dataframe['MACD_Signal']) & (dataframe['RSI'] > RSI_high) & (dataframe['close'] > dataframe['BB_Upper']), 1, 0)
+    dataframe['enter_short'] = np.where((dataframe['SMA'] < dataframe['close']) & (dataframe['MACD'] > dataframe['MACD_Signal']) & (dataframe['RSI'] > RSI_high) & (dataframe['close'] > dataframe['BB_Upper']), 1, 0)
+    dataframe['exit_short'] = np.where((dataframe['SMA'] > dataframe['close']) & (dataframe['MACD'] < dataframe['MACD_Signal']) & (dataframe['RSI'] < RSI_low) & (dataframe['close'] < dataframe['BB_Lower']), 1, 0)
 
     #return close price and signal columns
-#     return dataframe[['close', 'Enter_Long', 'Exit_Long', 'Enter_Short', 'Exit_Short']]
+#     return dataframe[['close', 'enter_long', 'exit_long', 'enter_short', 'exit_short']]
     return dataframe
 
 #Example how to run 'generate_trading_signals' function and default value of 'args'

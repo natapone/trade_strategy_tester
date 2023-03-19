@@ -16,13 +16,12 @@ def generate_trading_signal(dataframe):
     dataframe['oversold'] = np.where(dataframe['rsi'] < 30, 1, 0)
     dataframe['volatility'] = np.where(dataframe['vol'] > 0.015, 1, 0)
     #Generate trading signals
-    dataframe['Enter_Long'] = np.where(((dataframe['oversold'] == 1) | (dataframe['bullish'] == 1)) & (dataframe['volatility'] == 1), 1, 0)
-    dataframe['Exit_Long'] = np.where((dataframe['overbought'] == 1) | (dataframe['bearish'] == 1), 1, 0)
-    dataframe['Enter_Short'] = np.where((dataframe['overbought'] == 1) & (dataframe['bearish'] == 1) & (dataframe['volatility']==1), 1, 0)
-    dataframe['Exit_Short'] = np.where((dataframe['oversold'] == 1) | (dataframe['bullish'] == 1), 1, 0)
+    dataframe['enter_long'] = np.where(((dataframe['oversold'] == 1) | (dataframe['bullish'] == 1)) & (dataframe['volatility'] == 1), 1, 0)
+    dataframe['exit_long'] = np.where((dataframe['overbought'] == 1) | (dataframe['bearish'] == 1), 1, 0)
+    dataframe['enter_short'] = np.where((dataframe['overbought'] == 1) & (dataframe['bearish'] == 1) & (dataframe['volatility']==1), 1, 0)
+    dataframe['exit_short'] = np.where((dataframe['oversold'] == 1) | (dataframe['bullish'] == 1), 1, 0)
     #Return dataframe
     return dataframe
-
 
 # Prompt
 # Write python function for trading signal generator name 'generate_trading_signals'
