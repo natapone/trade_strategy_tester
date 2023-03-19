@@ -1,7 +1,15 @@
 import importlib
+from custom_module.trade_strategy_tester import tester
+
+module_tester_path = 'custom_module.trade_strategy_tester.tester'
 
 def generate_strategy(prompt_input,
     prompt_params={}, ai_name='openai'):
+
+    # tester = importlib.import_module(module_tester_path)
+    # quicktest_result = tester.run_quick_test( delete_if_fail=False)
+    # print(quicktest_result)
+    # return quicktest_result
 
     #1 init openai engine
     ai_path = f"custom_module.trade_strategy_tester.ai_engine.{ai_name}"
@@ -38,11 +46,24 @@ def generate_strategy(prompt_input,
         with open(strategy_path, 'w') as f:
             f.write(strategy_function_text)
 
+    #5 Run quick test with dummy data, delete if function can't execute
+    tester = importlib.import_module(module_tester_path)
+    quicktest_result = tester.run_quick_test(strategy_name=strategy_function_id, delete_if_fail=True)
+    # print(quicktest_result)
 
-    #5 return strategy name (key)
-
-    return {
-        'id': strategy_function_id.strip(),
-        'success_status': True,
-        'error_message': ''
-    }
+    #6 return strategy name (key)
+    if bool(quicktest_result):
+        # True = not empty => pass quick test
+        return {
+            'id': strategy_function_id.strip(),
+            'success_status': True,
+            'error_message': '',
+            'strategy_function_text': strategy_function_text
+        }
+    else:
+        return {
+            'id': strategy_function_id.strip(),
+            'success_status': False,
+            'error_message': 'Quick test fail',
+            'strategy_function_text': strategy_function_text
+        }

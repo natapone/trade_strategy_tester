@@ -1,15 +1,41 @@
 import importlib
 import pandas as pd
+import os
 
-def run_test(symbols,
+module_quick_test_data_path = 'custom_module/trade_strategy_tester/quick_test_data'
+module_strategy_path = "custom_module.trade_strategy_tester.signal_generator.strategy"
+
+def run_quick_test(strategy_name='example', delete_if_fail=True):
+    # load quick test data
+    # print(f"Run quick test >> {strategy_name}")
+    try:
+        data = _load_quick_test_data(module_quick_test_data_path)
+        test_result = run_test(strategy_name=strategy_name, quick_test_data=data)
+    except:
+        # Delete strategy file if try = error
+        # print("Strategy error!")
+        if delete_if_fail and strategy_name != 'example':
+            strategy_path = f"{module_strategy_path}_{strategy_name}"
+            strategy_path = strategy_path.replace(".", "/") + ".py"
+            # print(f"Delete >> {strategy_path}")
+
+            if os.path.isfile(strategy_path):
+                os.remove(strategy_path)
+
+        return {}
+
+    return test_result
+
+def run_test(symbols=None,
     since_dt=None,
     timeframe='1h',
     datasource_name='crypto',
     strategy_name='example',
-    test_name='ttest'):
+    test_name='ttest',
+    quick_test_data=None):
 
     datasource_path = f"custom_module.trade_strategy_tester.datasource.{datasource_name}"
-    strategy_path = f"custom_module.trade_strategy_tester.signal_generator.strategy_{strategy_name}"
+    strategy_path = f"{module_strategy_path}_{strategy_name}"
     test_path = f"custom_module.trade_strategy_tester.test_engine.{test_name}"
 
     signal_generator = importlib.import_module(strategy_path)
@@ -19,7 +45,12 @@ def run_test(symbols,
     # Steps
 
     #1 select set of test data, fetch from source
-    data = datasource.fetch(symbols,since_dt=since_dt,timeframe=timeframe)
+    data = {}
+    if quick_test_data == None:
+        data = datasource.fetch(symbols,since_dt=since_dt,timeframe=timeframe)
+    else:
+        data = quick_test_data
+        symbols = quick_test_data.keys()
 
     #2 generate_trading_signals
     signal_returns = {}
@@ -38,7 +69,7 @@ def run_test(symbols,
     for symbol in symbols:
 
         # signal_returns[symbol].plot.hist(bins=100, alpha=0.5)
-        plot_daily_return(signal_returns[symbol])
+        # plot_daily_return(signal_returns[symbol])
 
         t_stat, p_value = tester.test_result( signal_returns[symbol] )
 
@@ -77,20 +108,20 @@ def calculate_returns(signals):
             signals.loc[index, 'position'] = previous_position
 
         # enter long
-        if row['Enter_Long'] == 1:
+        if row['enter_long'] == 1:
             signals.loc[index, 'position'] = 1
 
         # enter short
-        if row['Enter_Short'] == 1:
+        if row['enter_short'] == 1:
             signals.loc[index, 'position'] = -1
 
         # exit long
-        if ((row['Exit_Long'] == 1)
+        if ((row['exit_long'] == 1)
             & (previous_position > 0)):
             signals.loc[index, 'position'] = 0
 
         # exit short
-        if ((row['Exit_Short'] == 1)
+        if ((row['exit_short'] == 1)
             & (previous_position < 0)):
             signals.loc[index, 'position'] = 0
 
@@ -134,3 +165,48 @@ p-value:        {:.6f}
     # Save image
     # ax = s.plot.hist()
     # ax.figure.savefig('demo-file.pdf')
+    return None
+
+def _symbol_to_filename(symbol):
+    filename = symbol.replace("/", "_")
+    return filename
+
+def _filename_to_symbol(filename):
+    symbol = filename.replace("_", "/")
+    return symbol
+
+def _save_quick_test_data(data):
+
+    if not os.path.exists(module_quick_test_data_path):
+       os.makedirs(module_quick_test_data_path)
+
+    for symbol in data.keys():
+        filename = _symbol_to_filename(symbol) + ".csv"
+        data[symbol].to_csv(f"{test_data_path}/{filename}")
+
+    return test_data_path
+
+def _load_quick_test_data(module_quick_test_data_path):
+
+    # loop read files in folders
+    files = {}
+
+    # Iterate directory
+    for file in os.listdir(module_quick_test_data_path):
+
+        file_path = os.path.join(module_quick_test_data_path, file)
+        symbol = file.split(".")
+        symbol = _filename_to_symbol(symbol[0])
+
+        if os.path.isfile(file_path):
+            files[symbol] = file_path
+
+#     print(files)
+    quick_test_data = {}
+
+#     # Loop read dataframe
+    for symbol in files.keys():
+        df = pd.read_csv(file_path)
+        quick_test_data[symbol] = df
+
+    return quick_test_data

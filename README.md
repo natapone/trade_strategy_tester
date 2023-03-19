@@ -47,5 +47,11 @@ prompt_params = {
     'max_tokens': 2500,
 }
 
-prompt_input = strategy_builder.generate_strategy(prompt_input, prompt_params=prompt_params)
+response = strategy_builder.generate_strategy(prompt_input, prompt_params=prompt_params)
+
+# Test strategy
+symbols = ['BTC/USDT', 'ETH/USDT']
+strategy_name = response['id']
+strategy_test_results = tester.run_test(symbols, strategy_name=strategy_name)
+tester.print_test_result(strategy_test_results)
 ```
