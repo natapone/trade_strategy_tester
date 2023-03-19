@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-def generate_prompt_string(animal):
-    pass
-
-def fetch_prompt(prompt_string):
-    pass
-=======
 import openai
 
 default_input = '''
@@ -18,8 +11,8 @@ default_input = '''
 
 def enhance_prompt_trade_strategy(prompt_input):
     prompt_input_pre  = '''
-Write python function for trading signal generator name 'generate_trading_signals'
-- Import necessary modules before start the function
+Write python function
+- Start function with 'def generate_trading_signal(dataframe):' for trading signal generator
 - import numpy as np, import talib.abstract as ta, import pandas as pd
 - Take input as 'dataframe' with colums: 'high', 'low', 'open', 'close'
 - Start function with 'def generate_trading_signal(dataframe):'
@@ -66,4 +59,3 @@ def fetch_prompt(prompt_params):
 # - Generate Enter short condition, set field 'sig_enter_short' = 1
 # - Generate Exit short condition, set field 'sig_exit_short' = 1
 # - Return dataframe
->>>>>>> ab088ec (create strategy from prompt)
