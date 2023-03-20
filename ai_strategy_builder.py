@@ -37,14 +37,14 @@ def generate_strategy(prompt_input,
         }
 
     #4 save strategy to file with prompt, response key as file name
-    strategy_function_text = strategy_function_text + \
+    strategy_function_text_full = strategy_function_text + \
         "\n\n\'\'\'\n" + prompt_params['prompt'] + "\n\'\'\'"
 
     if len(strategy_function_id.strip()) > 0 and len(strategy_function_text.strip()) > 0:
         strategy_path = f"./custom_module/trade_strategy_tester/signal_generator/strategy_{strategy_function_id}.py"
 
         with open(strategy_path, 'w') as f:
-            f.write(strategy_function_text)
+            f.write(strategy_function_text_full)
 
     #5 Run quick test with dummy data, delete if function can't execute
     tester = importlib.import_module(module_tester_path)

@@ -3,17 +3,19 @@ import pandas as pd
 import os
 
 module_quick_test_data_path = 'custom_module/trade_strategy_tester/quick_test_data'
-module_strategy_path = "custom_module.trade_strategy_tester.signal_generator.strategy"
+module_strategy_path = 'custom_module.trade_strategy_tester.signal_generator.strategy'
+module_strategy_plot_image_path = 'custom_module/trade_strategy_tester/strategy_plot'
 
 def run_quick_test(strategy_name='example', delete_if_fail=True):
     # load quick test data
     # print(f"Run quick test >> {strategy_name}")
+    test_result = {}
     try:
         data = _load_quick_test_data(module_quick_test_data_path)
         test_result = run_test(strategy_name=strategy_name, quick_test_data=data)
-    except:
+    except Exception as e:
         # Delete strategy file if try = error
-        # print("Strategy error!")
+        # print("--- Strategy error! " , e)
         if delete_if_fail and strategy_name != 'example':
             strategy_path = f"{module_strategy_path}_{strategy_name}"
             strategy_path = strategy_path.replace(".", "/") + ".py"
@@ -22,7 +24,7 @@ def run_quick_test(strategy_name='example', delete_if_fail=True):
             if os.path.isfile(strategy_path):
                 os.remove(strategy_path)
 
-        return {}
+            return {}
 
     return test_result
 
@@ -32,7 +34,8 @@ def run_test(symbols=None,
     datasource_name='crypto',
     strategy_name='example',
     test_name='ttest',
-    quick_test_data=None):
+    quick_test_data=None,
+    plot_image_path=module_strategy_plot_image_path):
 
     datasource_path = f"custom_module.trade_strategy_tester.datasource.{datasource_name}"
     strategy_path = f"{module_strategy_path}_{strategy_name}"
@@ -65,11 +68,11 @@ def run_test(symbols=None,
 
     #4 Test for Significance
     all_return = pd.DataFrame()
+    plot_return = pd.DataFrame()
     strategy_test_results = {}
     for symbol in symbols:
-
         # signal_returns[symbol].plot.hist(bins=100, alpha=0.5)
-        # plot_daily_return(signal_returns[symbol])
+        plot_return[symbol] = signal_returns[symbol]
 
         t_stat, p_value = tester.test_result( signal_returns[symbol] )
 
@@ -77,7 +80,6 @@ def run_test(symbols=None,
             all_return = signal_returns[symbol]
         else:
             all_return = pd.concat([all_return, signal_returns[symbol]], ignore_index=True)
-
 
         strategy_test_results[symbol] = {
             't_stat': t_stat,
@@ -91,7 +93,10 @@ def run_test(symbols=None,
             'p_value': p_value
         }
 
-    #5 return score
+    #5 Plot daily returns of all symbols
+    plot_daily_returns(plot_return, plot_image_path, plot_image_name=f"strategy_{strategy_name}.png")
+
+    #6 return score
     return strategy_test_results
 
 def calculate_returns(signals):
@@ -143,11 +148,22 @@ def calculate_returns(signals):
 
     return signal_return
 
-def plot_daily_return(signal_return):
-    daily_returns = signal_return.dropna() / 100
+def plot_daily_returns(plot_return, plot_image_path, plot_image_name):
+    daily_returns = plot_return.dropna() / 100
     cumulative_returns = (1 + daily_returns).cumprod() - 1
     cumulative_returns *= 100
-    cumulative_returns.sort_index().plot()
+    plot = cumulative_returns.sort_index().plot(figsize=(15, 10))
+    fig = plot.get_figure()
+    # print(plot)
+
+    # save image
+    if not os.path.exists(plot_image_path):
+       os.makedirs(plot_image_path)
+
+    plot_image_path = f"{plot_image_path}/{plot_image_name}"
+    # print(f"Save to >>> {plot_image_path}")
+    fig.savefig(plot_image_path)
+
 
 def print_test_result(strategy_test_results):
 
@@ -162,9 +178,6 @@ t-stat:        {:.3f}
 p-value:        {:.6f}
 """.format(symbol, t_stat, p_value))
 
-    # Save image
-    # ax = s.plot.hist()
-    # ax.figure.savefig('demo-file.pdf')
     return None
 
 def _symbol_to_filename(symbol):
@@ -201,12 +214,13 @@ def _load_quick_test_data(module_quick_test_data_path):
         if os.path.isfile(file_path):
             files[symbol] = file_path
 
-#     print(files)
+    # print(files)
     quick_test_data = {}
 
 #     # Loop read dataframe
     for symbol in files.keys():
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(files[symbol], index_col="timestamp")
+        df.index = pd.to_datetime(df.index)
         quick_test_data[symbol] = df
 
     return quick_test_data

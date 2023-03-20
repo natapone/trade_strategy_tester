@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 signal_generator/strategy_cmpl-*
+strategy_plot/*.png
