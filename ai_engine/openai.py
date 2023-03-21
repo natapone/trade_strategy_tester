@@ -35,6 +35,26 @@ Write python function
 
     return prompt_input
 
+def enhance_prompt_interpret_test_result(prompt_input):
+    prompt_input_pre  = '''
+As non-technical person interpret strategy testing result of t-test with the null hypothesis being that the expected mean return is zero. as the rules below
+- The result contain: 'symbol returns', 't_stat', 'p_value'
+- Use default p_value level = 0.06
+- 'All_Symbols' is aggregated returns from all test data and run t-test together
+
+Interpret result following steps below
+- p_value > default level, mean returns is not significant from 0, suggest the strategy return random result
+- p_value < default, mean returns is significant from 0, need to check t-test as below
+- p_value < default and t-test > 0, mean returns is significant above 0, this could be profitable strategy
+- p_value < default and t-test < 0, mean returns is significant below 0, this could be lost strategy
+
+List of t-test results
+'''
+
+    prompt_input = prompt_input_pre + prompt_input
+
+    return prompt_input
+
 def fetch_prompt(prompt_params):
     # init key
     openai.api_key = prompt_params.get('api_key','')

@@ -5,6 +5,7 @@ import os
 module_quick_test_data_path = 'custom_module/trade_strategy_tester/quick_test_data'
 module_strategy_path = 'custom_module.trade_strategy_tester.signal_generator.strategy'
 module_strategy_plot_image_path = 'custom_module/trade_strategy_tester/strategy_plot'
+module_ai_engine_path = 'custom_module.trade_strategy_tester.ai_engine'
 
 def run_quick_test(strategy_name='example', delete_if_fail=True):
     # load quick test data
@@ -198,6 +199,30 @@ def _save_quick_test_data(data):
         data[symbol].to_csv(f"{test_data_path}/{filename}")
 
     return test_data_path
+
+def interpret_test_result(quick_test_results,
+    prompt_params={}, ai_name='openai'):
+
+    ai_path = f"{module_ai_engine_path}.{ai_name}"
+    ai_engine = importlib.import_module(ai_path)
+
+    prompt_input = ""
+    for symbol in quick_test_results.keys():
+        prompt_input += "- {}, t_stat={:.4f}, p_value={:.4f} \n".format(
+            symbol, quick_test_results[symbol]['t_stat'], quick_test_results[symbol]['p_value'])
+
+    prompt_params['prompt'] = ai_engine.enhance_prompt_interpret_test_result(prompt_input)
+
+    try:
+        interpret_result = ai_engine.fetch_prompt(prompt_params)
+    except:
+        return "Test score: \n" + prompt_input
+
+    text_result = interpret_result.choices[0].text + \
+        "\n\nTest score: \n" + \
+        prompt_input
+
+    return text_result
 
 def _load_quick_test_data(module_quick_test_data_path):
 
