@@ -1,15 +1,12 @@
 import importlib
+import os
 from custom_module.trade_strategy_tester import tester
 
+module_host_path = "."
 module_tester_path = 'custom_module.trade_strategy_tester.tester'
 
 def generate_strategy(prompt_input,
-    prompt_params={}, ai_name='openai'):
-
-    # tester = importlib.import_module(module_tester_path)
-    # quicktest_result = tester.run_quick_test( delete_if_fail=False)
-    # print(quicktest_result)
-    # return quicktest_result
+    prompt_params={}, ai_name='openai', host_path=module_host_path):
 
     #1 init openai engine
     ai_path = f"custom_module.trade_strategy_tester.ai_engine.{ai_name}"
@@ -29,11 +26,12 @@ def generate_strategy(prompt_input,
 
         strategy_function_id = strategy_function.id
         strategy_function_text = strategy_function.choices[0].text
-    except:
+    except Exception as e:
         return {
             'id': '',
             'success_status': False,
-            'error_message': 'Call OpenAI API failed!'
+            'error_message': 'Call OpenAI API failed!',
+            'error_detail': str(e)
         }
 
     #4 save strategy to file with prompt, response key as file name
@@ -41,14 +39,14 @@ def generate_strategy(prompt_input,
         "\n\n\'\'\'\n" + prompt_params['prompt'] + "\n\'\'\'"
 
     if len(strategy_function_id.strip()) > 0 and len(strategy_function_text.strip()) > 0:
-        strategy_path = f"./custom_module/trade_strategy_tester/signal_generator/strategy_{strategy_function_id}.py"
+        strategy_path = f"{host_path}/custom_module/trade_strategy_tester/signal_generator/strategy_{strategy_function_id}.py"
 
         with open(strategy_path, 'w') as f:
             f.write(strategy_function_text_full)
 
     #5 Run quick test with dummy data, delete if function can't execute
     tester = importlib.import_module(module_tester_path)
-    quicktest_result = tester.run_quick_test(strategy_name=strategy_function_id, delete_if_fail=True)
+    quicktest_result = tester.run_quick_test(strategy_name=strategy_function_id, delete_if_fail=True, host_path=host_path)
     # print(quicktest_result)
 
     #6 return strategy name (key)

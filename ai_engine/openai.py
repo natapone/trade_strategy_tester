@@ -11,7 +11,7 @@ default_input = '''
 
 def enhance_prompt_trade_strategy(prompt_input):
     prompt_input_pre  = '''
-Write python function
+As python code generator, Write python function
 - Start function with 'def generate_trading_signal(dataframe):' for trading signal generator
 - import numpy as np, import talib.abstract as ta, import pandas as pd
 - Take input as 'dataframe' with colums: 'high', 'low', 'open', 'close'
@@ -30,8 +30,8 @@ Write python function
         prompt_input = default_input
 
     prompt_input = prompt_input_pre.strip() + \
-                "\n" + prompt_input.strip() + \
-                "\n" + prompt_input_post.strip()
+                "\n\n" + "Use trade strategy as below\n" + prompt_input.strip() + \
+                "\n\n" + "Close function with\n" + prompt_input_post.strip()
 
     return prompt_input
 

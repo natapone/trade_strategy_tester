@@ -2,24 +2,31 @@ import importlib
 import pandas as pd
 import os
 
+module_host_path = "."
 module_quick_test_data_path = 'custom_module/trade_strategy_tester/quick_test_data'
 module_strategy_path = 'custom_module.trade_strategy_tester.signal_generator.strategy'
 module_strategy_plot_image_path = 'custom_module/trade_strategy_tester/strategy_plot'
 module_ai_engine_path = 'custom_module.trade_strategy_tester.ai_engine'
 
-def run_quick_test(strategy_name='example', delete_if_fail=True):
+def run_quick_test(strategy_name='example', delete_if_fail=True, host_path=module_host_path):
+
     # load quick test data
+    test_data_path = f"{host_path}/{module_quick_test_data_path}"
+
     # print(f"Run quick test >> {strategy_name}")
     test_result = {}
     try:
-        data = _load_quick_test_data(module_quick_test_data_path)
-        test_result = run_test(strategy_name=strategy_name, quick_test_data=data)
+        data = _load_quick_test_data(test_data_path)
+        test_result = run_test(strategy_name=strategy_name,
+                            quick_test_data=data,
+                            host_path=host_path)
     except Exception as e:
         # Delete strategy file if try = error
         # print("--- Strategy error! " , e)
         if delete_if_fail and strategy_name != 'example':
             strategy_path = f"{module_strategy_path}_{strategy_name}"
             strategy_path = strategy_path.replace(".", "/") + ".py"
+            strategy_path = f"{host_path}/{strategy_path}"
             # print(f"Delete >> {strategy_path}")
 
             if os.path.isfile(strategy_path):
@@ -36,7 +43,8 @@ def run_test(symbols=None,
     strategy_name='example',
     test_name='ttest',
     quick_test_data=None,
-    plot_image_path=module_strategy_plot_image_path):
+    plot_image_path="",
+    host_path=module_host_path):
 
     datasource_path = f"custom_module.trade_strategy_tester.datasource.{datasource_name}"
     strategy_path = f"{module_strategy_path}_{strategy_name}"
@@ -95,6 +103,9 @@ def run_test(symbols=None,
         }
 
     #5 Plot daily returns of all symbols
+    if plot_image_path == "":
+        plot_image_path=f"{host_path}/{module_strategy_plot_image_path}"
+
     plot_daily_returns(plot_return, plot_image_path, plot_image_name=f"strategy_{strategy_name}.png")
 
     #6 return score
