@@ -211,16 +211,16 @@ def _save_quick_test_data(data):
 
     return test_data_path
 
-def interpret_test_result(quick_test_results,
+def interpret_test_result(test_results,
     prompt_params={}, ai_name='openai'):
 
     ai_path = f"{module_ai_engine_path}.{ai_name}"
     ai_engine = importlib.import_module(ai_path)
 
     prompt_input = ""
-    for symbol in quick_test_results.keys():
+    for symbol in test_results.keys():
         prompt_input += "- {}, t_stat={:.4f}, p_value={:.4f} \n".format(
-            symbol, quick_test_results[symbol]['t_stat'], quick_test_results[symbol]['p_value'])
+            symbol, test_results[symbol]['t_stat'], test_results[symbol]['p_value'])
 
     prompt_params['prompt'] = ai_engine.enhance_prompt_interpret_test_result(prompt_input)
 
@@ -234,6 +234,31 @@ def interpret_test_result(quick_test_results,
         prompt_input
 
     return text_result
+
+def interpret_test_result_text(test_result_text,
+    prompt_params={}, ai_name='openai'):
+
+    ai_path = f"{module_ai_engine_path}.{ai_name}"
+    ai_engine = importlib.import_module(ai_path)
+
+    prompt_params['prompt'] = ai_engine.enhance_prompt_interpret_test_result(test_result_text)
+
+    try:
+        interpret_result = ai_engine.fetch_prompt(prompt_params)
+    except:
+        return "Test score: \n" + test_result_text
+
+    test_result_text_full = interpret_result.choices[0].text 
+
+    return test_result_text_full
+
+def test_score_text(test_results):
+    score_text = ""
+    for symbol in test_results.keys():
+        score_text += "- {}, t_stat={:.4f}, p_value={:.4f} \n".format(
+            symbol, test_results[symbol]['t_stat'], test_results[symbol]['p_value'])
+
+    return score_text
 
 def _load_quick_test_data(module_quick_test_data_path):
 
