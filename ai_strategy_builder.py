@@ -30,8 +30,8 @@ def generate_strategy(prompt_input,
         return {
             'id': '',
             'success_status': False,
-            'error_message': 'Call OpenAI API failed!',
-            'error_detail': str(e)
+            'error_message': 'Call OpenAI API failed! Please try again',
+            'strategy_function_text': str(e)
         }
 
     #4 save strategy to file with prompt, response key as file name
@@ -56,12 +56,12 @@ def generate_strategy(prompt_input,
             'id': strategy_function_id.strip(),
             'success_status': True,
             'error_message': '',
-            'strategy_function_text': strategy_function_text
+            'strategy_function_text': strategy_function_text.strip()
         }
     else:
         return {
             'id': strategy_function_id.strip(),
             'success_status': False,
-            'error_message': 'Quick test fail',
-            'strategy_function_text': strategy_function_text
+            'error_message': 'Quick test fail! Please update prompt and create again',
+            'strategy_function_text': strategy_function_text.strip()
         }
