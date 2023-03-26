@@ -35,6 +35,24 @@ def run_quick_test(strategy_name='example', delete_if_fail=True, host_path=modul
 
             return {}
 
+    # Delete strategy file + image if return empty (can run test but no trade)
+    if test_result == {} and delete_if_fail and strategy_name != 'example':
+        strategy_path = f"{module_strategy_path}_{strategy_name}"
+        strategy_path = strategy_path.replace(".", "/") + ".py"
+        strategy_path = f"{host_path}/{strategy_path}"
+        # print(f"Delete >> {strategy_path}")
+
+        if os.path.isfile(strategy_path):
+            os.remove(strategy_path)
+
+        plot_path = f"{host_path}/{module_strategy_plot_image_path}"
+        plot_image_name=f"strategy_{strategy_name}.png"
+        plot_path = f"{plot_path}/{plot_image_name}"
+        # print(f"Delete >> {plot_path}")
+
+        if os.path.isfile(plot_path):
+            os.remove(plot_path)
+
     return test_result
 
 def run_test(symbols=None,
@@ -92,19 +110,21 @@ def run_test(symbols=None,
             all_return = pd.concat([all_return, signal_returns[symbol]], ignore_index=True)
 
         strategy_test_results[symbol] = {
-            't_stat': t_stat,
-            'p_value': p_value
+            't_stat': 0 if np.isnan(t_stat) else t_stat,
+            'p_value': 0 if np.isnan(p_value) else p_value
+
         }
 
     t_stat, p_value = tester.test_result(all_return)
 
     strategy_test_results['All_Symbols'] = {
-            't_stat': t_stat,
-            'p_value': p_value
+            't_stat': 0 if np.isnan(t_stat) else t_stat,
+            'p_value': 0 if np.isnan(p_value) else p_value
         }
 
     #4.1 if no score = test fail
-    if np.isnan(strategy_test_results['All_Symbols']['t_stat']):
+    if (strategy_test_results['All_Symbols']['t_stat'] == 0) and \
+        (strategy_test_results['All_Symbols']['p_value'] == 0):
         return {}
 
     #5 Plot daily returns of all symbols
@@ -156,12 +176,11 @@ def calculate_returns(signals):
     # Calculate return
     signals['position_ret'] = signals['position'] * signals['ret']
 
-    # Select only when signel
-    idx_signal = signals['position'] != 0
-    signal_return = signals.loc[idx_signal, 'position_ret']
-    signal_return = signal_return.dropna()
+    signal_return = signals['position_ret']
 
-#     print(signal_return.tail(50))
+    signal_return = signal_return.dropna()
+    # print('=======================')
+    # print(signal_return)
 
     return signal_return
 
@@ -226,6 +245,7 @@ def interpret_test_result(test_results,
     for symbol in test_results.keys():
         prompt_input += "- {}, t_stat={:.4f}, p_value={:.4f} \n".format(
             symbol, test_results[symbol]['t_stat'], test_results[symbol]['p_value'])
+    # "- {}, t_stat={:.4f}, p_value={:.4f} \n"
 
     prompt_params['prompt'] = ai_engine.enhance_prompt_interpret_test_result(prompt_input)
 
