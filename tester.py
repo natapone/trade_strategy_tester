@@ -1,6 +1,7 @@
 import importlib
 import pandas as pd
 import os
+import numpy as np
 
 module_host_path = "."
 module_quick_test_data_path = 'custom_module/trade_strategy_tester/quick_test_data'
@@ -102,6 +103,10 @@ def run_test(symbols=None,
             'p_value': p_value
         }
 
+    #4.1 if no score = test fail
+    if np.isnan(strategy_test_results['All_Symbols']['t_stat']):
+        return {}
+
     #5 Plot daily returns of all symbols
     if plot_image_path == "":
         plot_image_path=f"{host_path}/{module_strategy_plot_image_path}"
@@ -174,7 +179,7 @@ def plot_daily_returns(plot_return, plot_image_path, plot_image_name):
 
     plot_image_path = f"{plot_image_path}/{plot_image_name}"
     # print(f"Save to >>> {plot_image_path}")
-    fig.savefig(plot_image_path)
+    fig.savefig(plot_image_path, bbox_inches='tight')
 
 
 def print_test_result(strategy_test_results):
@@ -248,7 +253,7 @@ def interpret_test_result_text(test_result_text,
     except:
         return "Test score: \n" + test_result_text
 
-    test_result_text_full = interpret_result.choices[0].text 
+    test_result_text_full = interpret_result.choices[0].text
 
     return test_result_text_full
 
