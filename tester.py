@@ -254,7 +254,7 @@ def interpret_test_result(test_results,
     except:
         return "Test score: \n" + prompt_input
 
-    text_result = interpret_result.choices[0].text + \
+    text_result = interpret_result.choices[0].message.content + \
         "\n\nTest score: \n" + \
         prompt_input
 
@@ -273,7 +273,7 @@ def interpret_test_result_text(test_result_text,
     except:
         return "Test score: \n" + test_result_text
 
-    test_result_text_full = interpret_result.choices[0].text
+    test_result_text_full = interpret_result.choices[0].message.content
 
     return test_result_text_full
 

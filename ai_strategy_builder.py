@@ -25,7 +25,7 @@ def generate_strategy(prompt_input,
         # print(strategy_function.choices[0].text)
 
         strategy_function_id = strategy_function.id
-        strategy_function_text = strategy_function.choices[0].text
+        strategy_function_text = strategy_function.choices[0].message.content
     except Exception as e:
         return {
             'id': '',

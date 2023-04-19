@@ -59,23 +59,16 @@ def fetch_prompt(prompt_params):
     # init key
     openai.api_key = prompt_params.get('api_key','')
 
-    response = openai.Completion.create(
-        model = prompt_params.get('model','text-davinci-003'),
-        prompt = prompt_params.get('prompt',''),
+    prompt_input=[
+        {"role": "user", "content": prompt_params.get('prompt','')}
+    ]
+
+    response = openai.ChatCompletion.create(
+        model = "gpt-3.5-turbo",
+        messages = prompt_input,
         temperature = prompt_params.get('temperature',0.7),
-        max_tokens = prompt_params.get('max_tokens',2500),
-        top_p = 1,
-        frequency_penalty = 0,
-        presence_penalty = 0
+        max_tokens = prompt_params.get('max_tokens',2500)
     )
 
     # print(response)
     return response
-
-
-
-# - Generate Enter long condition, set field 'sig_enter_long' = 1
-# - Generate Exit long condition, set field 'sig_exit_long' = 1
-# - Generate Enter short condition, set field 'sig_enter_short' = 1
-# - Generate Exit short condition, set field 'sig_exit_short' = 1
-# - Return dataframe
